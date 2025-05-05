@@ -1,5 +1,6 @@
 import json
 
+
 def save_to_json(data, filename):
     if isinstance(data, str):
         data = data.strip()
@@ -13,7 +14,7 @@ def save_to_json(data, filename):
         except json.JSONDecodeError as e:
             print(f"❌ Cannot decode JSON string. Error: {e}")
             return
-    
-    with open(filename, 'w', encoding='utf-8') as f:
+
+    with open(filename, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
     print(f"✅ Data saved to {filename}")
