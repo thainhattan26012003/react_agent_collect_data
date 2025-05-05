@@ -1,4 +1,5 @@
 import re
+from saving import save_to_json
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain_openai import ChatOpenAI
 from langchain.tools import StructuredTool
@@ -34,14 +35,21 @@ template = """You are a powerful chatbot to collect user's data input.
     - Review star:
     - Job name:
     
-    **For example**
-    user's data input: Price i want is 300k, the time take 2 hours, i need 3 stars view and the last one is babysitter job
-    That the Final answer must be:
-    Final Answer: 
+    ---
+
+    **Example for your understanding (do not use this as actual input):**
+
+    Example user input: "Price I want is 300k, the time take 2 hours, I need 3 stars view and the last one is babysitter job"
+
+    Example Final Answer:
     - Price: 300k
     - Time: 2 hours
-    - Review star: 3 
+    - Review star: 3
     - Job name: babysitter
+
+    ---
+
+When answering, process ONLY the actual question provided below as input.
 
 You have access to the following tools:
 
@@ -67,10 +75,10 @@ Thought:{agent_scratchpad}
 prompt = PromptTemplate.from_template(template)
 
 PATTERNS = {
-    "Price":       re.compile(r"Price\s*[:\-]?\s*([\d.,]+\s*[kKmM]?)", re.IGNORECASE),
-    "Time":      re.compile(r"Time\s*[:\-]?\s*([\d.,]+\s*(giờ|phút|tiếng)?)", re.IGNORECASE),
-    "Review star":  re.compile(r"Review star\s*[:\-]?\s*(\d+)\s*sao", re.IGNORECASE),
-    "Job name": re.compile(r"Job name\s*[:\-]?\s*([A-Za-zÀ-Ỹ0-9 ]+)", re.IGNORECASE),
+    "Price": re.compile(r"(\d+[.,]?\d*\s*[kKmM]?)", re.IGNORECASE),
+    "Time": re.compile(r"(\d+[.,]?\d*\s*(hours|hour?))", re.IGNORECASE),
+    "Review star": re.compile(r"(\d+)\s*(review star|review stars|stars|star?)", re.IGNORECASE),
+    "Job name": re.compile(r"(?:job is|job's|job name is|as|i work as|as a)\s*([A-Za-zÀ-Ỹ0-9 ]+)", re.IGNORECASE),
 }
 
 def input_data():
@@ -85,7 +93,7 @@ def parse_input(text: str) -> dict:
     return "\n".join(f"{k}: {v}" for k, v in info.items())
 
 def ask_field(field: str) -> str:
-    return f"\nPlease provide value for “{field}”."
+    return f"\nPlease provide value for “{field}”\n."
 
 parse_fc = StructuredTool.from_function(
     func=parse_input,
@@ -107,7 +115,7 @@ inp_fc = StructuredTool.from_function(
 
 tools = [parse_fc, ask_fc, inp_fc]
 
-llm = ChatOpenAI(model="gpt-4o")
+llm = ChatOpenAI(model="gpt-4o", temperature=0)
 
 # Construct the ReAct agent
 agent = create_react_agent(llm, tools=tools, prompt=prompt)
@@ -124,3 +132,6 @@ response = agent_executor.invoke({"input": user_query,
 
 final_output = response["output"] if "output" in response else response
 print("\n🎯 Final Structured Output:\n", final_output)
+
+    
+save_to_json(final_output, "data.json")
