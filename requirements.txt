@@ -3,8 +3,10 @@ dotenv
 python-dotenv
 langchain_core
 llama-index
-openai
 llama-index-llms-openai
 langchain
 langchain_community
 langchain_openai
+djangorestframework
+django
+django-cors-headers
