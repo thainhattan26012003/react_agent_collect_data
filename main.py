@@ -1,12 +1,12 @@
 import os
 from dotenv import load_dotenv
-import re
 from saving import save_to_json
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain_openai import ChatOpenAI
 from langchain.tools import StructuredTool
 from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
 from langchain.output_parsers import StructuredOutputParser, ResponseSchema
+from langchain.callbacks import StdOutCallbackHandler
 
 load_dotenv(".env")
 
@@ -148,8 +148,18 @@ response = agent_executor.invoke(
 )
 
 
-final_output = response["output"] if "output" in response else response
-print("\n🎯 Final Structured Output:\n", final_output)
 
+# # Lấy các bước trung gian
+# steps = response.get("intermediate_steps", [])
+# print("step:", steps)
 
-save_to_json(final_output, "data.json")
+# # In ra Action Input (nếu có)
+# for step in steps:
+#     if "actions" in step:
+#         for action in step["actions"]:
+#             if action.tool == "ask_field":  # Chỉ in ra khi tool là ask_field
+#                 print(f"Yêu cầu nhập: {action.tool_input}")
+
+# # In ra kết quả cuối cùng
+# print("\nKết quả cuối cùng:")
+# print(response["output"])
