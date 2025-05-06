@@ -6,7 +6,6 @@ from langchain_openai import ChatOpenAI
 from langchain.tools import StructuredTool
 from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
 from langchain.output_parsers import StructuredOutputParser, ResponseSchema
-from langchain.callbacks import StdOutCallbackHandler
 
 load_dotenv(".env")
 
@@ -147,19 +146,4 @@ response = agent_executor.invoke(
     {"input": user_query, "format_instructions": format_instructions}
 )
 
-
-
-# # Lấy các bước trung gian
-# steps = response.get("intermediate_steps", [])
-# print("step:", steps)
-
-# # In ra Action Input (nếu có)
-# for step in steps:
-#     if "actions" in step:
-#         for action in step["actions"]:
-#             if action.tool == "ask_field":  # Chỉ in ra khi tool là ask_field
-#                 print(f"Yêu cầu nhập: {action.tool_input}")
-
-# # In ra kết quả cuối cùng
-# print("\nKết quả cuối cùng:")
-# print(response["output"])
+save_to_json(response, "data.json")
