@@ -8,3 +8,4 @@ langchain
 langchain_community
 langchain_openai
 logging
+streamlit

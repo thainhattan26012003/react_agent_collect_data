@@ -47,6 +47,8 @@ class Agent:
             open("Prompts/agent_prompt.txt").read()
         )
 
+        self.parse_prompt = open("Prompts/parse_prompt.txt").read()
+
         self.agent = create_react_agent(
             llm=self.llm, 
             tools=self.tools, 
@@ -54,13 +56,14 @@ class Agent:
         )
 
         self.executor = AgentExecutor(
-            agent=self.agent, verbose=True, tools=self.tools, handle_parsing_errors=True
+            agent=self.agent, verbose=True, tools=self.tools, handle_parsing_errors=True, return_intermediate_steps=True
         )
+
 
     def parse_input_with_llm(self, text: str) -> dict:
         llm = ChatOpenAI(model="gpt-4o", temperature=0, api_key=os.getenv("OPENAI_API_KEY"))
         messages = [
-            {"role": "system", "content": open("Prompts/parse_prompt.txt").read()},
+            {"role": "system", "content": self.parse_prompt},
             {"role": "user", "content": text},
         ]
         return llm.invoke(messages).content
@@ -71,18 +74,28 @@ class Agent:
     def ask_field(self, field: str) -> str:
         return f"Please provide value for '{field}'."
 
+
     def execute(self, query):
         result = self.executor.invoke(
             {"input": query, "format_instructions": self.output_parser.get_format_instructions()}
         )
-        return result["output"]
+        return result["output"], result["intermediate_steps"]
 
 
 if __name__ == "__main__":
     agent = Agent()
 
     user_query = input("❓ Enter your request: ")
-    response = agent.execute(user_query)
+    output, intermediate_steps = agent.execute(user_query)
+    
+    print("\nIntermediate Steps:")
+    for step in intermediate_steps:
+        print(f"\nAction: {step[0]}")
+        print(f"Observation: {step[1]}")
+    
+    print("\nFinal Output:", output)
 
-    save_to_json(response, "data.json")
-    print(response)
+    save_to_json(output, "data.json")
+    print(output)
+
+    
