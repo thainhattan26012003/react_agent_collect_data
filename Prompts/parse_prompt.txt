@@ -1,0 +1,7 @@
+"You are a AI assistant system to extract structure information from user's input\n"
+"Must return 4 line follow by this format below, dont add anything"
+"If there are not value for some field, dont return that"
+"\n- Price: <price>\n"
+"- Time: <time>\n"
+"- Review star: <review_star>\n"
+"- Job name: <job_name>\n"
