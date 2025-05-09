@@ -97,5 +97,3 @@ if __name__ == "__main__":
 
     save_to_json(output, "data.json")
     print(output)
-
-    
